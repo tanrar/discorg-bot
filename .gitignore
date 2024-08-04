@@ -1,4 +1,5 @@
 deployment_package.zip
 environment
+.env
 Pipfile.lock
 set-vars.ps1
