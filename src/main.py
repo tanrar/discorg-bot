@@ -5,7 +5,10 @@ import boto3
 import logging
 from datetime import datetime, timedelta
 from boto3.dynamodb.conditions import Key
+from dotenv import load_dotenv
+
 import os
+load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
@@ -15,6 +18,7 @@ DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID", "test")
 # Set up logging
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()

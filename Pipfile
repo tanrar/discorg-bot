@@ -9,7 +9,6 @@ discord = "*"
 anthropic = "*"
 boto3 = "*"
 asyncio = "*"
-aiohttp = "*"
 
 [dev-packages]
 black = "*"
