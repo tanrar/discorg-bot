@@ -3,7 +3,7 @@ New-Item -ItemType Directory -Force -Path .\deployment_package | Out-Null
 Set-Location .\deployment_package
 
 # Install dependencies into the deployment package directory
-pipenv run pip install --no-deps -t . discord.py anthropic boto3
+pipenv run pip install  -t . discord.py anthropic boto3
 
 # Create src directory in the deployment package
 New-Item -ItemType Directory -Force -Path .\src | Out-Null
