@@ -3,7 +3,7 @@ New-Item -ItemType Directory -Force -Path .\deployment_package | Out-Null
 Set-Location .\deployment_package
 
 # Install dependencies into the deployment package directory
-pipenv run pip install  -t . discord.py anthropic boto3
+pipenv run pip install --platform manylinux2014_x86_64 --only-binary=:all: --target . discord.py anthropic boto3
 
 # Create src directory in the deployment package
 New-Item -ItemType Directory -Force -Path .\src | Out-Null
@@ -24,7 +24,6 @@ function Copy-FileIfExists {
 
 # Copy Lambda function files
 Copy-FileIfExists "main.py"
-Copy-FileIfExists "settings.py"
 
 # Create the deployment package
 Compress-Archive -Path * -DestinationPath ..\deployment_package.zip -Force
