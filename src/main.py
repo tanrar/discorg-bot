@@ -6,19 +6,17 @@ import logging
 from datetime import datetime, timedelta
 from boto3.dynamodb.conditions import Key
 from dotenv import load_dotenv
-
 import os
+
+# Load environment variables
 load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-
 DYNAMODB_TABLE_NAME = os.getenv("DYNAMODB_TABLE_NAME", "discorg-bot")
-
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID", "test")
-# Set up logging
 
+# Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
@@ -164,10 +162,14 @@ async def main(channel_id):
     else:
         logger.info("No summarize command found, ending execution")
 
-
 def lambda_handler(event, context):
     logger.info("Lambda function invoked")
     channel_id = int(DISCORD_CHANNEL_ID)
     asyncio.get_event_loop().run_until_complete(main(channel_id))
     logger.info("Lambda function execution completed")
     return {"statusCode": 200, "body": "Execution completed"}
+
+if __name__ == "__main__":
+    channel_id = int(DISCORD_CHANNEL_ID)
+    asyncio.run(main(channel_id))
+
