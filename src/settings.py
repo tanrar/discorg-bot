@@ -1,4 +1,4 @@
-#Todo, fix the installation. For now, this'll go in main.py. We just want a MVP, not a finished product
+# Todo, fix the installation. For now, this'll go in main.py. We just want a MVP, not a finished product
 
 import os
 
