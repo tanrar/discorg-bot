@@ -1,36 +1,35 @@
-# Discord Summarization Bot
+# Discord Summarization and Chat Bot
 
-This bot summarizes conversations in a Discord channel using the Anthropic API. It's designed to run on AWS Lambda but can also be run locally for testing purposes.
+This bot summarizes conversations in a Discord channel and can engage in chat interactions using the Anthropic API. It's designed to run as a standalone Python application.
 
 ## Features
 
-- Monitors a specified Discord channel for the `!summarize` command
-- Retrieves recent messages (up to 1 hour old)
-- Uses Anthropic's Claude model to generate a summary
-- Stores the last summarized message ID in DynamoDB
-- Can be run locally or deployed to AWS Lambda
+- Monitors a specified Discord channel
+- Generates hourly, 8-hour, and daily summaries of conversations
+- Creates user-specific daily summaries
+- Engages in chat interactions with customizable personality
+- Uses Anthropic's Claude model for summarization and chat responses
 
 ## How It Works
 
-1. The bot checks for a `!summarize` command in the specified channel
-2. If found, it fetches messages since the last summarization (or up to 1 hour old)
-3. Messages are sent to Anthropic's API for summarization
-4. The summary is posted back to the Discord channel
-5. The last summarized message ID is updated in DynamoDB
+1. The bot connects to Discord and monitors the specified channel
+2. It responds to various slash commands for generating summaries
+3. When chatting is enabled, it can respond to messages or engage randomly
+4. Summaries and chat responses are generated using Anthropic's API
+5. Summaries are posted in a designated output channel
 
 ## Prerequisites
 
 - Python 3.8+
 - A Discord bot token
 - An Anthropic API key
-- AWS credentials configured (for DynamoDB access and Lambda deployment)
 
 ## Installation
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/discord-summarization-bot.git
-   cd discord-summarization-bot
+   git clone https://github.com/yourusername/discord-summarization-chat-bot.git
+   cd discord-summarization-chat-bot
    ```
 
 2. Install dependencies using pipenv:
@@ -41,14 +40,14 @@ This bot summarizes conversations in a Discord channel using the Anthropic API. 
 3. Create a `.env` file in the project root with the following content:
    ```
    ANTHROPIC_API_KEY=your_anthropic_api_key
-   DYNAMODB_TABLE_NAME=your_dynamodb_table_name
    DISCORD_BOT_TOKEN=your_discord_bot_token
-   DISCORD_CHANNEL_ID=your_discord_channel_id
+   MONITOR_CHANNEL_ID=your_monitor_channel_id
+   OUTPUT_CHANNEL_ID=your_output_channel_id
    ```
 
-## Running Locally
+## Running the Bot
 
-To run the bot locally for testing:
+To run the bot:
 
 1. Activate the pipenv shell:
    ```
@@ -57,10 +56,19 @@ To run the bot locally for testing:
 
 2. Run the script:
    ```
-   python main.py
+   python src/main.py
    ```
 
-The bot will now monitor the specified Discord channel for the `!summarize` command.
+The bot will now connect to Discord and respond to commands in the specified channels.
+
+## Available Commands
+
+- `/hourly_summary`: Generate and post an hourly summary
+- `/daily_summary`: Generate and post a daily summary
+- `/eight_hour_summary`: Generate and post an 8-hour summary
+- `/user_daily_summary`: Generate a daily summary focused on a specific user
+- `/enable_chat`: Enable bot chatting in the monitored channel
+- `/disable_chat`: Disable bot chatting in the monitored channel
 
 ## Development
 
@@ -76,29 +84,14 @@ To update dependencies:
 pipenv update
 ```
 
-## AWS Lambda Deployment
+## Deployment
 
-A deployment script is provided to easily upload the bot to AWS Lambda. To use it:
+While this bot is designed to run as a standalone application, you can modify it to run on cloud platforms like AWS Lambda. A deployment script (`deployment.ps1`) is provided for creating a deployment package, which can be useful if you decide to deploy to a cloud environment in the future.
 
-1. Ensure you have the AWS CLI configured with your credentials.
+## Logging
 
-2. Install the required packages:
-   ```
-   pipenv install boto3
-   ```
+The bot uses Python's built-in logging module to log important events and errors. Logs are printed to the console and can be redirected to a file if needed.
 
-3. Set the environment variable for your Lambda function name:
-   ```
-   export AWS_LAMBDA_FUNCTION_NAME=your-lambda-function-name
-   ```
+## Contributing
 
-4. Run the deployment script:
-   ```
-   pipenv run python deploy_lambda.py
-   ```
-
-This script will create a deployment package with all dependencies and upload it to your specified Lambda function. Make sure the IAM role associated with your AWS credentials has permissions to update Lambda functions.
-
-Note: This script assumes that your Lambda function already exists. If you need to create a new function, you'll need to modify the script or create the function manually in the AWS Console first.
-
-Remember to configure your Lambda function with the necessary environment variables (ANTHROPIC_API_KEY, DYNAMODB_TABLE_NAME, DISCORD_BOT_TOKEN, DISCORD_CHANNEL_ID) in the AWS Console or via the AWS CLI.
+Contributions are welcome! Please feel free to submit a Pull Request.
