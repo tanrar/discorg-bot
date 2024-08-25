@@ -7,6 +7,7 @@ from claude_bot import ClaudeBot
 from datetime import datetime, time, timedelta, timezone
 import random
 from collections import deque
+import json
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -28,6 +29,18 @@ logger.info(f"Monitor Channel ID: {MONITOR_CHANNEL_ID}, Output Channel ID: {OUTP
 MAX_CONTEXT_MESSAGES = 100
 context_messages = deque(maxlen=MAX_CONTEXT_MESSAGES)
 chatting_enabled = False
+current_personality = "bane"
+
+PROMPTS_FILE = 'prompts.json'
+
+def load_prompts():
+    if os.path.exists(PROMPTS_FILE):
+        with open(PROMPTS_FILE, 'r') as f:
+            return json.load(f)
+    logger.warning(f"Prompts file {PROMPTS_FILE} not found. Using empty prompts dictionary.")
+    return {}
+
+prompts = load_prompts()
 
 @bot.event
 async def on_ready():
@@ -80,6 +93,19 @@ async def disable_chat(interaction: discord.Interaction):
     logger.info(f"Chatting disabled by {interaction.user}")
     await interaction.response.send_message("Chatting has been disabled. I'll stop responding to messages in the monitored channel.")
 
+@bot.tree.command(name="set_personality", description="Set the bot's personality")
+async def set_personality(interaction: discord.Interaction, personality: str):
+    global current_personality
+    valid_personalities = ["chat", "howard_dean_catgirl", "bane"]
+    
+    if personality.lower() not in valid_personalities:
+        await interaction.response.send_message(f"Invalid personality. Choose from: {', '.join(valid_personalities)}")
+        return
+    
+    current_personality = personality.lower()
+    logger.info(f"Personality set to {current_personality} by {interaction.user}")
+    await interaction.response.send_message(f"Bot personality has been set to: {current_personality}")
+
 async def generate_summary(interaction: discord.Interaction, time_period: timedelta, summary_type: str):
     monitor_channel = bot.get_channel(MONITOR_CHANNEL_ID)
     output_channel = bot.get_channel(OUTPUT_CHANNEL_ID)
@@ -111,16 +137,13 @@ async def generate_summary(interaction: discord.Interaction, time_period: timede
 
     # Generate summary using Claude
     messages_text = "\n".join([f"{m.author.name}: {m.content}" for m in messages])
-    prompt = f"""Please summarize the following conversation from the last {summary_type.lower()}:
 
-{messages_text}
+    if 'summary' not in prompts:
+        logger.error("Summary prompt not found in prompts file.")
+        await interaction.followup.send("Error: Summary prompt not configured.")
+        return
 
-Provide a concise summary highlighting the following:
-1. Key points and topics discussed
-2. Notable activities or updates from individual participants (mention them by name)
-3. Any important decisions or conclusions reached
-
-Keep the summary clear and informative, focusing on the most relevant information."""
+    prompt = prompts['summary'].format(summary_type=summary_type.lower(), messages_text=messages_text)
     logger.debug(f"Sending prompt to Claude: {prompt[:100]}...")
     
     try:
@@ -174,21 +197,12 @@ async def generate_user_summary(interaction: discord.Interaction, target_user: d
     all_messages_text = "\n".join([f"{m.author.name}: {m.content}" for m in all_messages])
     user_messages_text = "\n".join([f"{m.content}" for m in user_messages])
 
-    prompt = f"""Please summarize the activity of user {target_user.name} from the following conversation that occurred in the last {summary_type.lower()}:
+    if 'user_summary' not in prompts:
+        logger.error("User summary prompt not found in prompts file.")
+        await interaction.followup.send("Error: User summary prompt not configured.")
+        return
 
-All messages for context:
-{all_messages_text}
-
-Messages from {target_user.name}:
-{user_messages_text}
-
-Provide a concise summary highlighting the following:
-1. Key points and topics discussed by {target_user.name}
-2. Notable activities or updates from {target_user.name}
-3. How {target_user.name}'s messages relate to or interact with the overall conversation
-4. Any important decisions or conclusions reached by {target_user.name}
-
-Keep the summary clear and informative, focusing on the most relevant information about {target_user.name}'s activity while providing necessary context from the overall conversation."""
+    prompt = prompts['user_summary'].format(target_user=target_user.name, summary_type=summary_type.lower(), all_messages_text=all_messages_text, user_messages_text=user_messages_text)
 
     try:
         summary = await claude_bot.generate_response(prompt)
@@ -204,16 +218,16 @@ Keep the summary clear and informative, focusing on the most relevant informatio
     logger.info(f"Notified user {interaction.user} about {summary_type.lower()} summary completion for {target_user.name}")
 
 async def generate_bot_response(message_content, context):
-    prompt = f"""You are a friendly, humorous, and liberal AI assistant participating in a Discord chat. Your name is ClaudeBot, and you love to engage in witty banter and intellectual discussions. You're passionate about social justice, science, technology, and pop culture. Always try to be helpful, but don't be afraid to crack jokes or share interesting facts.
+    global current_personality
+    
+    with open('src/base_prompt.json', 'r') as f:
+        prompts = json.load(f)
+    
+    if current_personality not in prompts:
+        logger.error(f"{current_personality} prompt not found in prompts file.")
+        return f"Error: {current_personality} prompt not configured."
 
-Here's the recent context of the conversation:
-
-{context}
-
-Now, respond to this message:
-{message_content}
-
-Keep your response concise, friendly, and in the style of a Discord chat message."""
+    prompt = prompts[current_personality].format(context=context, message_content=message_content)
 
     try:
         response = await claude_bot.generate_response(prompt)
