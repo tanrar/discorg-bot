@@ -23,15 +23,16 @@ logger.info("Initialized ClaudeBot with API key")
 
 MONITOR_CHANNEL_ID = int(os.getenv('MONITOR_CHANNEL_ID'))
 OUTPUT_CHANNEL_ID = int(os.getenv('OUTPUT_CHANNEL_ID'))
+CHAT_BOT_CHANNEL = int(os.getenv('CHAT_BOT_CHANNEL'))
 logger.info(f"Monitor Channel ID: {MONITOR_CHANNEL_ID}, Output Channel ID: {OUTPUT_CHANNEL_ID}")
 
 # Add this near the top of the file, after other global variables
 MAX_CONTEXT_MESSAGES = 100
 context_messages = deque(maxlen=MAX_CONTEXT_MESSAGES)
-chatting_enabled = False
-current_personality = "bane"
+chatting_enabled = True
+current_personality = "obama_discord"
 
-PROMPTS_FILE = 'prompts.json'
+PROMPTS_FILE = 'src/base_prompt.json'
 
 def load_prompts():
     if os.path.exists(PROMPTS_FILE):
@@ -96,7 +97,7 @@ async def disable_chat(interaction: discord.Interaction):
 @bot.tree.command(name="set_personality", description="Set the bot's personality")
 async def set_personality(interaction: discord.Interaction, personality: str):
     global current_personality
-    valid_personalities = ["chat", "howard_dean_catgirl", "bane"]
+    valid_personalities = ["chat", "howard_dean_catgirl", "bane", "botanical_artifice", "darrow_red_rising", "uwu_insult", "darrow_uwu", "obama_discord", "envy_adams"]
     
     if personality.lower() not in valid_personalities:
         await interaction.response.send_message(f"Invalid personality. Choose from: {', '.join(valid_personalities)}")
@@ -244,15 +245,15 @@ async def on_message(message):
     logger.debug(f"Received message from {message.author} in channel {message.channel.name}")
     await bot.process_commands(message)
 
-    if message.channel.id == MONITOR_CHANNEL_ID:
+    if message.channel.id == CHAT_BOT_CHANNEL:
         context_messages.append(f"{message.author.name}: {message.content}")
         context = "\n".join(list(context_messages))
 
-        if chatting_enabled and (bot.user.mentioned_in(message) or random.random() < 0.1):  # 10% chance to respond randomly
+        if chatting_enabled:
             async with message.channel.typing():
                 response = await generate_bot_response(message.content, context)
             await message.channel.send(response)
-            logger.info(f"Bot responded to message in monitor channel from {message.author}")
+            logger.info(f"Bot responded to message in chatbot channel from {message.author}")
 
 if __name__ == "__main__":
     logger.info("Starting the bot...")
