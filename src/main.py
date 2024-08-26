@@ -30,7 +30,7 @@ logger.info(f"Monitor Channel ID: {MONITOR_CHANNEL_ID}, Output Channel ID: {OUTP
 MAX_CONTEXT_MESSAGES = 100
 context_messages = deque(maxlen=MAX_CONTEXT_MESSAGES)
 chatting_enabled = True
-current_personality = "obama_discord"
+current_personality = "robot_pretending"
 
 PROMPTS_FILE = 'src/base_prompt.json'
 
@@ -97,7 +97,7 @@ async def disable_chat(interaction: discord.Interaction):
 @bot.tree.command(name="set_personality", description="Set the bot's personality")
 async def set_personality(interaction: discord.Interaction, personality: str):
     global current_personality
-    valid_personalities = ["chat", "howard_dean_catgirl", "bane", "botanical_artifice", "darrow_red_rising", "uwu_insult", "darrow_uwu", "obama_discord", "envy_adams"]
+    valid_personalities = ["chat", "howard_dean_catgirl", "bane", "botanical_artifice", "darrow_red_rising", "uwu_insult", "darrow_uwu", "obama_discord","envy_adams", "robot_pretending", "jackie_daytona"]
     
     if personality.lower() not in valid_personalities:
         await interaction.response.send_message(f"Invalid personality. Choose from: {', '.join(valid_personalities)}")
