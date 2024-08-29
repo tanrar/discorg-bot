@@ -43,6 +43,10 @@ def load_prompts():
 
 prompts = load_prompts()
 
+def clear_context_messages():
+    global context_messages
+    context_messages = []
+
 @bot.event
 async def on_ready():
     logger.info(f'{bot.user} has connected to Discord!')
@@ -97,7 +101,7 @@ async def disable_chat(interaction: discord.Interaction):
 @bot.tree.command(name="set_personality", description="Set the bot's personality")
 async def set_personality(interaction: discord.Interaction, personality: str):
     global current_personality
-    valid_personalities = ["chat", "howard_dean_catgirl", "bane", "botanical_artifice", "darrow_red_rising", "uwu_insult", "darrow_uwu", "obama_discord","envy_adams", "robot_pretending", "jackie_daytona"]
+    valid_personalities = ["chat", "howard_dean_catgirl", "bane", "botanical_artifice", "darrow_red_rising", "uwu_insult", "darrow_uwu", "obama_discord","envy_adams", "robot_pretending", "jackie_daytona", "harry_disco_elysium"]
     
     if personality.lower() not in valid_personalities:
         await interaction.response.send_message(f"Invalid personality. Choose from: {', '.join(valid_personalities)}")
@@ -106,6 +110,33 @@ async def set_personality(interaction: discord.Interaction, personality: str):
     current_personality = personality.lower()
     logger.info(f"Personality set to {current_personality} by {interaction.user}")
     await interaction.response.send_message(f"Bot personality has been set to: {current_personality}")
+
+@bot.tree.command(name="clear_memory", description="Clear the bot's memory of recent messages")
+async def clear_memory(interaction: discord.Interaction):
+    clear_context_messages()
+    logger.info(f"Memory cleared by {interaction.user}")
+    await interaction.response.send_message("Bot's memory has been cleared.")
+
+@bot.tree.command(name="help", description="Display a list of available commands and their descriptions")
+async def help_command(interaction: discord.Interaction):
+    commands = [
+        ("/hourly_summary", "Generate and post an hourly summary"),
+        ("/daily_summary", "Generate and post a daily summary"),
+        ("/eight_hour_summary", "Generate and post an 8-hour summary"),
+        ("/user_daily_summary", "Generate a daily summary focused on a specific user"),
+        ("/enable_chat", "Enable bot chatting in the monitored channel"),
+        ("/disable_chat", "Disable bot chatting in the monitored channel"),
+        ("/set_personality", "Set the bot's personality"),
+        ("/clear_memory", "Clear the bot's memory of recent messages"),
+        ("/help", "Display this list of commands")
+    ]
+
+    help_text = "**Available Commands:**\n\n"
+    for command, description in commands:
+        help_text += f"`{command}`: {description}\n"
+
+    await interaction.response.send_message(help_text)
+    logger.info(f"Help command used by {interaction.user}")
 
 async def generate_summary(interaction: discord.Interaction, time_period: timedelta, summary_type: str):
     monitor_channel = bot.get_channel(MONITOR_CHANNEL_ID)
@@ -247,7 +278,10 @@ async def on_message(message):
 
     if message.channel.id == CHAT_BOT_CHANNEL:
         context_messages.append(f"{message.author.name}: {message.content}")
-        context = "\n".join(list(context_messages))
+        if len(context_messages) > MAX_CONTEXT_MESSAGES:
+            context_messages.pop(0)
+        
+        context = "\n".join(context_messages)
 
         if chatting_enabled:
             async with message.channel.typing():

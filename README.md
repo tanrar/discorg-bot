@@ -7,14 +7,27 @@ This bot summarizes conversations in a Discord channel and can engage in chat in
 - Monitors a specified Discord channel
 - Generates hourly, 8-hour, and daily summaries of conversations
 - Creates user-specific daily summaries
-- Engages in chat interactions with customizable personality
+- Engages in chat interactions with customizable personalities
 - Uses Anthropic's Claude model for summarization and chat responses
+- Maintains context memory for more coherent conversations
+
+## Available Commands
+
+- `/hourly_summary`: Generate and post an hourly summary
+- `/daily_summary`: Generate and post a daily summary
+- `/eight_hour_summary`: Generate and post an 8-hour summary
+- `/user_daily_summary`: Generate a daily summary focused on a specific user
+- `/enable_chat`: Enable bot chatting in the monitored channel
+- `/disable_chat`: Disable bot chatting in the monitored channel
+- `/set_personality`: Set the bot's personality (e.g., Harry from Disco Elysium)
+- `/clear_memory`: Clear the bot's memory of recent messages
+- `/help`: Display a list of available commands and their descriptions
 
 ## How It Works
 
 1. The bot connects to Discord and monitors the specified channel
-2. It responds to various slash commands for generating summaries
-3. When chatting is enabled, it can respond to messages or engage randomly
+2. It responds to various slash commands for generating summaries and managing its behavior
+3. When chatting is enabled, it can respond to messages using the selected personality
 4. Summaries and chat responses are generated using Anthropic's API
 5. Summaries are posted in a designated output channel
 
@@ -37,38 +50,14 @@ This bot summarizes conversations in a Discord channel and can engage in chat in
    pipenv install
    ```
 
-3. Create a `.env` file in the project root with the following content:
-   ```
-   ANTHROPIC_API_KEY=your_anthropic_api_key
-   DISCORD_BOT_TOKEN=your_discord_bot_token
-   MONITOR_CHANNEL_ID=your_monitor_channel_id
-   OUTPUT_CHANNEL_ID=your_output_channel_id
-   ```
+3. Set up your environment variables (Discord token, Anthropic API key, etc.)
 
-## Running the Bot
-
-To run the bot:
-
-1. Activate the pipenv shell:
+4. Run the bot:
    ```
-   pipenv shell
+   pipenv run python src/main.py
    ```
 
-2. Run the script:
-   ```
-   python src/main.py
-   ```
-
-The bot will now connect to Discord and respond to commands in the specified channels.
-
-## Available Commands
-
-- `/hourly_summary`: Generate and post an hourly summary
-- `/daily_summary`: Generate and post a daily summary
-- `/eight_hour_summary`: Generate and post an 8-hour summary
-- `/user_daily_summary`: Generate a daily summary focused on a specific user
-- `/enable_chat`: Enable bot chatting in the monitored channel
-- `/disable_chat`: Disable bot chatting in the monitored channel
+For more detailed setup instructions, please refer to the documentation.
 
 ## Development
 
