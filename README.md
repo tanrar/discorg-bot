@@ -7,7 +7,8 @@ This bot summarizes conversations in a Discord channel and can engage in chat in
 - Monitors a specified Discord channel
 - Generates hourly, 8-hour, and daily summaries of conversations
 - Creates user-specific daily summaries
-- Engages in chat interactions with customizable personalities
+- Engages in chat interactions with customizable personalities, including:
+  - Default chat
 - Uses Anthropic's Claude model for summarization and chat responses
 - Maintains context memory for more coherent conversations
 
